@@ -1,5 +1,18 @@
+body {
+    background-color: black;
+}
+
 h1 {
     text-align: center;
+    font-size: 36px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    text-decoration: underline;
+    color: #3498db;
+    background-color: #f0f0f0;
+    padding: 10px;
+    border-radius: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 table {
@@ -8,6 +21,7 @@ table {
     border: 1px solid black;
     border-collapse: collapse;
     font-size: 24px;
+    background-color: orange;
 }
 
 td {
@@ -15,4 +29,10 @@ td {
     height: 73px;
     border: 1px solid black;
     cursor: pointer;
+}
+
+
+.hide {
+    overflow: hidden;
+    text-indent: 100%;
 }
