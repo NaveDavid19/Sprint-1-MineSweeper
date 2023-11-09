@@ -1,20 +1,35 @@
 'use strict'
 
-var gLevel = {
-
-}
-var isGameOn = true
-var safeCells = 0
-var gBoard
 const MINE = '💣'
 const FLAG = '🚩'
 
+const difficulties = {
+    beginner: {
+        size: 4,
+        numOfMines: 2
+    },
+    medium: {
+        size: 8,
+        numOfMines: 14
+    },
+    expert: {
+        size: 12,
+        numOfMines: 32
+    }
+}
+
+var isGameOn
+var safeCells = 0
+var gBoard
+var currDifficulty
+var mineCounter
+var isFirstClick
+var elBtnReset = document.querySelector('.smiley')
+var elLives = document.querySelector('p')
+
 document.addEventListener(`contextmenu`, (event) => {
-
-
     event.preventDefault();
 });
-
 
 function addFlagListeners() {
     var elFlagCell = document.querySelectorAll('td')
@@ -31,14 +46,19 @@ function addFlagListeners() {
             } else {
                 elCell.innerText = ''
             }
+            checkGameOver()
         });
     }
 }
 
 function onInIt() {
-    gBoard = creatBoard(4)
-    console.log(gBoard);
-    randomMineLocation(gBoard, 2)
+    isGameOn = true
+    isFirstClick = true
+    mineCounter = 0
+    elLives.innerText = '♥ ♥ ♥'
+    currDifficulty = difficulties.beginner
+
+    gBoard = creatBoard(currDifficulty.size)
     renderBoard(gBoard)
     addFlagListeners()
 }
@@ -49,11 +69,9 @@ function creatBoard(size) {
         board[i] = []
 
         for (var j = 0; j < size; j++) {
-            board[i][j] = {}
+            board[i][j] = ''
         }
     }
-    // board[2][2] = MINE
-    // board[3][1] = MINE
     return board
 }
 
@@ -65,7 +83,6 @@ function renderBoard(board) {
         for (var j = 0; j < board.length; j++) {
             if (board[i][j] !== MINE) {
                 strHtml += `<td class="empty" data-i="${i}" data-j="${j}" onclick="onCellClick(this)"></td>`
-                safeCells++
             } else {
                 strHtml += `<td class="mine" data-ismine="${true}" data-i="${i}" data-j="${j}" onclick="onCellClick(this)">${MINE}</td>`
             }
@@ -75,6 +92,7 @@ function renderBoard(board) {
     }
     elTable.innerHTML = strHtml
 }
+
 function setMinesNegsCount(rowIdx, colIdx) {
     var count = 0
 
@@ -93,75 +111,107 @@ function setMinesNegsCount(rowIdx, colIdx) {
 }
 
 function onCellClick(elCell) {
+    var i = elCell.dataset.i
+    var j = elCell.dataset.j
 
+    if (isFirstClick) {
+        randomMineLocation(currDifficulty.numOfMines, i, j)
+        renderBoard(gBoard)
+        var elCells = document.querySelectorAll('td')
+        for (var z = 0; z < elCells.length; z++) {
+            if (elCells[z].dataset.i === i && elCells[z].dataset.j === j) {
+                elCell = elCells[z]
+            }
+        }
+        addFlagListeners()
+        isFirstClick = false
+    }
     if (!isGameOn) return
     if (elCell.innerText === FLAG) return
     if (elCell.innerText !== MINE) {
-        var i = elCell.dataset.i
-        var j = elCell.dataset.j
+        elCell.classList.add('disabled')
         elCell.innerText = setMinesNegsCount(i, j)
         if (elCell.innerText === '0') {
             expandShown(i, j)
         }
         safeCells--
-    } else {
+    }
+    if (elCell.innerText === MINE) {
+        mineCounter++
+        elCell.classList.remove('mine')
+        elCell.classList.add('disabled')
+    }
+    if (mineCounter === 1) {
+        elLives.innerText = '♥ ♥'
+    }
+    if (mineCounter === 2) {
+        elLives.innerText = '♥'
+    }
+    if (mineCounter === 3) {
+        elLives.innerText = ''
         var elMines = document.querySelectorAll('.mine')
         for (var i = 0; i < elMines.length; i++)
             elMines[i].classList.toggle('mine')
     }
-    checkGameOver(elCell)
+    checkGameOver()
 }
 
-function randomMineLocation(gBoard, numOfBombs) {
-
-    var minecounter = 0
-    while (minecounter < numOfBombs) {
+function randomMineLocation(numOfMines, skipRowIdx, skipColIdx) {
+    var counter = 0
+    while (counter < numOfMines) {
         var randRowIdx = getRandomInt(0, gBoard.length)
         var randColIdx = getRandomInt(0, gBoard.length)
+        if (randRowIdx === +skipRowIdx && randColIdx === +skipColIdx) {
+            continue;
+        }
+
         var currCell = gBoard[randRowIdx][randColIdx]
         if (currCell !== MINE) {
             gBoard[randRowIdx][randColIdx] = MINE
-            minecounter++
+            counter++
         }
     }
+
+    safeCells = currDifficulty.size ** 2 - counter
 }
 
-function checkGameOver(elCell) {
-    if (safeCells === 0) {
+function checkGameOver() {
+    // console.log('hey');
+    var isFlagged = isMinesFlagged()
+    if (safeCells === 0 & isFlagged) {
+        elBtnReset.innerText = '😎'
         console.log('Victory');
         isGameOn = false
+    }
 
-    } if (elCell.innerText === MINE) {
+    if (mineCounter === 3) {
+        elBtnReset.innerText = '🤯'
         console.log('you lose');
         isGameOn = false
     }
 }
 
 function selectBoardSize(elBtn) {
-
+    if (elBtn.innerText === 'Beginner') {
+        currDifficulty = difficulties.beginner
+    }
 
     if (elBtn.innerText === 'Medium') {
-        gBoard = creatBoard(8)
-        randomMineLocation(gBoard, 14)
-        renderBoard(gBoard)
-        addFlagListeners()
+        currDifficulty = difficulties.medium
     }
+
     if (elBtn.innerText === 'Expert') {
-        gBoard = creatBoard(12)
-        randomMineLocation(gBoard, 32)
-        renderBoard(gBoard)
-        addFlagListeners()
+        currDifficulty = difficulties.expert
     }
-    if (elBtn.innerText === 'Beginner') {
-        gBoard = creatBoard(4)
-        randomMineLocation(gBoard, 2)
-        renderBoard(gBoard)
-        addFlagListeners()
-    }
+
+    gBoard = creatBoard(currDifficulty.size)
+    randomMineLocation(currDifficulty.numOfMines)
+    renderBoard(gBoard)
+    addFlagListeners()
 }
 
 function expandShown(rowIdx, colIdx) {
-    var elNeigCells = document.querySelectorAll('td')
+    var elNeigCells = document.querySelectorAll('.empty')
     rowIdx = +rowIdx
     colIdx = +colIdx
     for (var x = rowIdx - 1; x <= rowIdx + 1; x++) {
@@ -169,10 +219,35 @@ function expandShown(rowIdx, colIdx) {
         for (var y = colIdx - 1; y <= colIdx + 1; y++) {
             if (x === rowIdx && y === colIdx) continue
             if (y < 0 || y >= gBoard[0].length) continue
+
             for (var z = 0; z < elNeigCells.length; z++) {
-                if (+elNeigCells[z].dataset.i === x &&
-                    +elNeigCells[z].dataset.j === y) { onCellClick(elNeigCells[z]) }
+                var neighbor = elNeigCells[z]
+                if (+neighbor.dataset.i === x &&
+                    +neighbor.dataset.j === y) {
+                    if (neighbor.innerText === '') {
+                        onCellClick(elNeigCells[z])
+                    }
+                }
             }
         }
     }
+}
+
+
+
+function isMinesFlagged() {
+    var isFlagged
+    var elCells = document.querySelectorAll('td')
+    for (var i = 0; i < elCells.length; i++) {
+        var currCell = elCells[i]
+        if (currCell.dataset.ismine) {
+            if (currCell.innerText === FLAG) {
+                isFlagged = true
+            } else {
+                isFlagged = false
+                break;
+            }
+        }
+    }
+    return isFlagged
 }

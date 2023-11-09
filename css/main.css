@@ -41,7 +41,39 @@ td {
 
 div {
     text-align: center;
-
     padding: 5px;
 
+}
+
+p {
+    color: red;
+    text-align: center;
+    padding: 5px;
+    font-size: 26px;
+    padding: 10px;
+    border-radius: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.btn1 {
+    background-color: #62ff00;
+}
+
+.btn2 {
+    background-color: orange;
+}
+
+.btn3 {
+    background-color: red;
+}
+
+
+.smiley {
+    padding-top: 20px;
+}
+
+
+.disabled {
+    pointer-events: none;
+    cursor: not-allowed;
 }
