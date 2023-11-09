@@ -205,7 +205,6 @@ function selectBoardSize(elBtn) {
     }
 
     gBoard = creatBoard(currDifficulty.size)
-    randomMineLocation(currDifficulty.numOfMines)
     renderBoard(gBoard)
     addFlagListeners()
 }
