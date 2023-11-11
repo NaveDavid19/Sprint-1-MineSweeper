@@ -28,6 +28,7 @@ var isFirstClick
 var elBtnReset = document.querySelector('.smiley')
 var elBtnLives = document.querySelector('p')
 var elBtnSafeClicks = document.querySelector('.safe-click')
+currDifficulty = difficulties.beginner
 
 document.addEventListener(`contextmenu`, (event) => {
     event.preventDefault();
@@ -39,8 +40,8 @@ function onInIt() {
     isFirstClick = true
     mineCounter = 0
     safeCounter = 3
+    elBtnSafeClicks.innerText = `Safes Clicks : ${safeCounter}`
     elBtnLives.innerText = '♥ ♥ ♥'
-    currDifficulty = difficulties.beginner
 
     gBoard = creatBoard(currDifficulty.size)
     renderBoard(gBoard)
@@ -196,6 +197,8 @@ function checkGameOver() {
 }
 
 function selectBoardSize(elBtn) {
+    // safeCounter = 3
+    // elBtnLives.innerText = '♥ ♥ ♥'
     if (elBtn.innerText === 'Beginner') {
         currDifficulty = difficulties.beginner
     }
@@ -209,6 +212,7 @@ function selectBoardSize(elBtn) {
     }
 
     gBoard = creatBoard(currDifficulty.size)
+    onInIt()
     renderBoard(gBoard)
     addFlagListeners()
 }
