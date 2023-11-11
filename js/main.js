@@ -17,45 +17,29 @@ const difficulties = {
         numOfMines: 32
     }
 }
-
 var isGameOn
+var isDark = false
 var safeCells = 0
+var safeCounter
 var gBoard
 var currDifficulty
 var mineCounter
 var isFirstClick
 var elBtnReset = document.querySelector('.smiley')
-var elLives = document.querySelector('p')
+var elBtnLives = document.querySelector('p')
+var elBtnSafeClicks = document.querySelector('.safe-click')
 
 document.addEventListener(`contextmenu`, (event) => {
     event.preventDefault();
 });
 
-function addFlagListeners() {
-    var elFlagCell = document.querySelectorAll('td')
-    for (var i = 0; i < elFlagCell.length; i++) {
-        elFlagCell[i].addEventListener(`contextmenu`, (event) => {
-            if (!isGameOn) return
-            var elCell = event.target
-            if (elCell.innerText === FLAG) return
-            if (elCell.dataset.ismine) { elCell.classList.toggle('mine') }
-            if (elCell.innerText !== FLAG) {
-                elCell.innerText = FLAG
-            } else if (elCell.dataset.ismine) {
-                elCell.innerText = MINE
-            } else {
-                elCell.innerText = ''
-            }
-            checkGameOver()
-        });
-    }
-}
 
 function onInIt() {
     isGameOn = true
     isFirstClick = true
     mineCounter = 0
-    elLives.innerText = '♥ ♥ ♥'
+    safeCounter = 3
+    elBtnLives.innerText = '♥ ♥ ♥'
     currDifficulty = difficulties.beginner
 
     gBoard = creatBoard(currDifficulty.size)
@@ -131,6 +115,7 @@ function onCellClick(elCell) {
     if (elCell.innerText !== MINE) {
         elCell.classList.add('disabled')
         elCell.innerText = setMinesNegsCount(i, j)
+        gBoard[i][j] = elCell.innerText
         if (elCell.innerText === '0') {
             expandShown(i, j)
         }
@@ -142,18 +127,38 @@ function onCellClick(elCell) {
         elCell.classList.add('disabled')
     }
     if (mineCounter === 1) {
-        elLives.innerText = '♥ ♥'
+        elBtnLives.innerText = '♥ ♥'
     }
     if (mineCounter === 2) {
-        elLives.innerText = '♥'
+        elBtnLives.innerText = '♥'
     }
     if (mineCounter === 3) {
-        elLives.innerText = ''
+        elBtnLives.innerText = ''
         var elMines = document.querySelectorAll('.mine')
         for (var i = 0; i < elMines.length; i++)
             elMines[i].classList.toggle('mine')
     }
     checkGameOver()
+}
+
+function addFlagListeners() {
+    var elFlagCell = document.querySelectorAll('td')
+    for (var i = 0; i < elFlagCell.length; i++) {
+        elFlagCell[i].addEventListener(`contextmenu`, (event) => {
+            if (!isGameOn) return
+            var elCell = event.target
+            if (elCell.innerText === FLAG) return
+            if (elCell.dataset.ismine) { elCell.classList.toggle('mine') }
+            if (elCell.innerText !== FLAG) {
+                elCell.innerText = FLAG
+            } else if (elCell.dataset.ismine) {
+                elCell.innerText = MINE
+            } else {
+                elCell.innerText = ''
+            }
+            checkGameOver()
+        });
+    }
 }
 
 function randomMineLocation(numOfMines, skipRowIdx, skipColIdx) {
@@ -176,7 +181,6 @@ function randomMineLocation(numOfMines, skipRowIdx, skipColIdx) {
 }
 
 function checkGameOver() {
-    // console.log('hey');
     var isFlagged = isMinesFlagged()
     if (safeCells === 0 & isFlagged) {
         elBtnReset.innerText = '😎'
@@ -232,8 +236,6 @@ function expandShown(rowIdx, colIdx) {
     }
 }
 
-
-
 function isMinesFlagged() {
     var isFlagged
     var elCells = document.querySelectorAll('td')
@@ -249,4 +251,30 @@ function isMinesFlagged() {
         }
     }
     return isFlagged
+}
+function darkMode() {
+    var elBody = document.querySelector('body')
+    if (!isDark) {
+        elBody.style.backgroundColor = '#26282b'
+        isDark = true
+    } else {
+        elBody.style.backgroundColor = '#738efa'
+        isDark = false
+    }
+}
+
+function safeClick() {
+    if (safeCounter === 0) return
+    safeCounter--
+    elBtnSafeClicks.innerText = `Safes Clicks : ${safeCounter}`
+
+    var currEmptyCell = findEmptyCell()
+    console.log('currEmptyCell : ', currEmptyCell);
+
+    var cell = document.querySelector(`[data-i="${currEmptyCell.i}"][data-j="${currEmptyCell.j}"]`)
+    cell.innerText = setMinesNegsCount(currEmptyCell.i, currEmptyCell.j)
+    gBoard[currEmptyCell.i][currEmptyCell.j] = cell.innerText
+    setTimeout(() => {
+        cell.innerText = ''
+    }, 3000);
 }

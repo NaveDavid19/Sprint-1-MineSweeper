@@ -17,7 +17,7 @@ function findEmptyCell() {
     var emptyCells = []
     for (var i = 0; i < gBoard.length; i++) {
         for (var j = 0; j < gBoard[i].length; j++) {
-            if (gBoard[i][j] === EMPTY) {
+            if (gBoard[i][j] === '') {
                 emptyCells.push({
                     i,
                     j,
@@ -26,7 +26,7 @@ function findEmptyCell() {
         }
     }
     if (emptyCells.length === 0) return null
-    return emptyCells.splice(getRandomInteger(0, emptyCells.length), 1)[0]
+    return emptyCells.splice(getRandomInt(0, emptyCells.length), 1)[0]
 }
 
 
